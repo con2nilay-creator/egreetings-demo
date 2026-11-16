@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community E-Greetings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=DM+Serif+Display&family=Figtree:wght@400;500;600;700&family=Nunito:wght@500;800&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a two-pane maker. Controls on the left in numbered steps, the live card pinned on the right. Eucalyptus green ink, wattle gold accent. */
+:root{
+  --bg:#f3f5f1;
+  --surface:#ffffff;
+  --ink:#16302a;
+  --muted:#5b6f68;
+  --line:#d9e1db;
+  --brand:#1f5c4a;
+  --brand-ink:#ffffff;
+  --accent:#e2a019;
+  --accent-soft:#fbf0d6;
+  --lock:#8a5a00;
+  --font-ui:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-display:"DM Serif Display", Georgia, serif;
+  --radius:12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1714; --surface:#15221e; --ink:#e4ede8; --muted:#9db0a8; --line:#284039;
+    --brand:#6fc3a3; --brand-ink:#0b1512; --accent:#f0b43c; --accent-soft:#33290f; --lock:#f0c46a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1714; --surface:#15221e; --ink:#e4ede8; --muted:#9db0a8; --line:#284039;
+  --brand:#6fc3a3; --brand-ink:#0b1512; --accent:#f0b43c; --accent-soft:#33290f; --lock:#f0c46a;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px clamp(16px,4vw,40px);border-bottom:1px solid var(--line);background:var(--surface)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:var(--brand);display:grid;place-items:center}
+.brand h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:1.45rem;line-height:1.1}
+.brand p{margin:0;color:var(--muted);font-size:.85rem}
+.demo-tag{font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,440px);gap:clamp(20px,3vw,40px);padding:clamp(16px,3vw,32px) clamp(16px,4vw,40px) 48px;max-width:1240px;margin:0 auto}
+.steps{display:flex;flex-direction:column;gap:18px;min-width:0}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+.step h2{margin:0 0 12px;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:10px}
+.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--brand);color:var(--brand-ink);font-size:.85rem;font-weight:700;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:500}
+.chip:hover{border-color:var(--brand)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.designs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.design{border:2px solid transparent;border-radius:10px;padding:0;background:none;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:stretch;text-align:center;font-size:.85rem;color:var(--muted)}
+.design canvas{width:100%;aspect-ratio:4/5;border-radius:8px;display:block;border:1px solid var(--line)}
+.design[aria-pressed="true"]{border-color:var(--accent)}
+.design[aria-pressed="true"] span{color:var(--ink);font-weight:600}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field.wide{grid-column:1/-1}
+label{font-size:.85rem;font-weight:600}
+input[type=text],input[type=tel],input[type=email],input[type=number],textarea{border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--bg);width:100%}
+textarea{resize:vertical;min-height:88px}
+.hint{font-size:.82rem;color:var(--muted);margin:6px 0 0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.tab{border:0;background:transparent;padding:10px 12px;cursor:pointer;font-weight:600;text-align:left;display:flex;flex-direction:column}
+.tab small{font-weight:400;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--accent-soft);box-shadow:inset 0 -3px 0 var(--accent)}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.plan{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:transparent;text-align:left;display:flex;flex-direction:column;gap:2px}
+.plan b{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.plan small{color:var(--muted)}
+.plan[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.btn{border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--brand);color:var(--brand-ink);display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.share-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.share{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:.9rem;background:transparent;cursor:pointer}
+.share:hover{border-color:var(--brand)}
+.share svg{width:26px;height:26px}
+.locked{position:relative}
+.locked .share-grid,.locked .direct{opacity:.35;pointer-events:none}
+.lock-note{display:none;margin:0 0 12px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);color:var(--lock);font-weight:600;font-size:.9rem}
+.locked .lock-note{display:block}
+.linkbox{display:flex;gap:8px;margin-top:12px}
+.linkbox input{font-size:.82rem;color:var(--muted)}
+.how{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.how div{border-radius:10px;padding:12px 14px;border:1px dashed var(--line);font-size:.88rem}
+.how h3{margin:0 0 4px;font-size:.9rem}
+.how p{margin:0;color:var(--muted)}
+.direct{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.direct h3{margin:0 0 8px;font-size:.95rem}
+.status{margin:10px 0 0;font-size:.88rem;color:var(--muted);min-height:1.3em}
+.preview{position:sticky;top:20px;align-self:start;display:flex;flex-direction:column;gap:12px}
+.preview canvas{width:100%;aspect-ratio:4/5;border-radius:14px;box-shadow:0 18px 40px rgba(10,30,24,.18);display:block;background:var(--surface)}
+.preview .row{justify-content:center}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 16px 32px}
+/* checkout dialog */
+.modal{position:fixed;inset:0;background:rgba(8,18,15,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.show{display:flex}
+.sheet{background:var(--surface);border-radius:14px;max-width:420px;width:100%;padding:22px;border:1px solid var(--line)}
+.sheet h2{margin:0 0 6px;font-family:var(--font-display);font-weight:400;font-size:1.5rem}
+.sum{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.stripe-note{font-size:.85rem;color:var(--muted);margin:14px 0}
+/* recipient view */
+.recipient{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#2a6b56,#0f2a22);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;z-index:30;overflow:auto}
+.recipient.show{display:flex}
+.recipient h2{color:#fff;font-family:var(--font-display);font-weight:400;margin:0;font-size:1.6rem;text-align:center}
+.env{position:relative;width:min(340px,80vw);aspect-ratio:4/3;margin-top:60px}
+.reveal{display:none;width:min(420px,86vw);max-height:70vh;aspect-ratio:4/5;object-fit:contain;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:rise .6s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.recipient.opened .env{display:none}
+.recipient.opened .reveal{display:block}
+.env-back{position:absolute;inset:0;background:#e9dcc0;border-radius:8px}
+.env-card{position:absolute;left:6%;right:6%;bottom:8%;aspect-ratio:4/5;border-radius:8px;overflow:hidden;transition:transform .9s cubic-bezier(.2,.8,.2,1) .35s;transform:translateY(0);z-index:1}
+.env-card img{width:100%;height:100%;object-fit:cover;display:block}
+.env-front{position:absolute;inset:0;z-index:2;background:linear-gradient(160deg,#f3e8cf,#e3d2ad);clip-path:polygon(0 35%,50% 70%,100% 35%,100% 100%,0 100%);border-radius:8px}
+.env-flap{position:absolute;left:0;right:0;top:0;height:60%;z-index:3;background:#dcc89e;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .5s ease}
+.env.open .env-flap{transform:rotateX(180deg);z-index:0}
+.env.open .env-card{transform:translateY(-42%)}
+.recipient .after{display:none;gap:10px;flex-wrap:wrap;justify-content:center}
+.recipient.opened .after{display:flex}
+.recipient .btn.light{background:#fff;color:#16302a}
+.recipient .close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;display:none;z-index:40;max-width:90vw}
+.toast.show{display:block}
+@media (max-width:860px){
+  main{grid-template-columns:1fr}
+  .preview{position:static;order:-1;max-width:420px;width:100%;margin:0 auto}
+}
+@media (max-width:520px){
+  .fields,.how{grid-template-columns:1fr}
+  .designs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .share-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .plans{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){
+  .env-card,.env-flap{transition:none}
+  .reveal{animation:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2" stroke="#fff" stroke-width="2"/><path d="M3.5 7l8.5 6 8.5-6" stroke="#f0b43c" stroke-width="2"/></svg>
+    </div>
+    <div>
+      <h1>Community E-Greetings</h1>
+      <p>Make a card, share it free, support local projects</p>
+    </div>
+  </div>
+  <span class="demo-tag">Working demo by NKDS</span>
+</header>
+
+<main>
+  <div class="steps">
+    <section class="step" aria-labelledby="h-occ">
+      <h2 id="h-occ"><span class="num">1</span>Choose an occasion</h2>
+      <div class="chips" id="occasions" role="group" aria-label="Occasion"></div>
+    </section>
+
+    <section class="step" aria-labelledby="h-des">
+      <h2 id="h-des"><span class="num">2</span>Pick a design</h2>
+      <div class="designs" id="designs" role="group" aria-label="Design"></div>
+    </section>
+
+    <section class="step" aria-labelledby="h-msg">
+      <h2 id="h-msg"><span class="num">3</span>Write your message</h2>
+      <div class="fields">
+        <div class="field"><label for="to">To</label><input type="text" id="to" maxlength="40" value="Priya"></div>
+        <div class="field"><label for="from">From</label><input type="text" id="from" maxlength="40" value="Sam and the Nguyen family"></div>
+        <div class="field wide"><label for="msg">Message</label><textarea id="msg" maxlength="260"></textarea>
+          <p class="hint"><span id="count">0</span>/260 characters</p></div>
+        <div class="field wide"><label>Lettering</label>
+          <div class="chips" id="fonts" role="group" aria-label="Lettering style"></div></div>
+      </div>
+    </section>
+
+    <section class="step" aria-labelledby="h-type">
+      <h2 id="h-type"><span class="num">4</span>Personal or corporate</h2>
+      <div class="tabs" role="tablist" aria-label="Card type">
+        <button class="tab" role="tab" id="tab-personal" aria-selected="true" aria-controls="panel-personal">Personal<small>Free to send</small></button>
+        <button class="tab" role="tab" id="tab-corp" aria-selected="false" aria-controls="panel-corp">Corporate<small>Your logo, paid plans</small></button>
+      </div>
+
+      <div id="panel-personal" role="tabpanel" aria-labelledby="tab-personal">
+        <p style="margin:0 0 10px">Personal cards are always free. You can add a donation to support community projects.</p>
+        <div class="chips" id="donations" role="group" aria-label="Donation amount"></div>
+        <div class="row" style="margin-top:12px">
+          <div class="field" style="width:130px;display:none" id="otherWrap"><label for="other">Amount (A$)</label><input type="number" id="other" min="1" max="5000" value="15"></div>
+          <button class="btn" id="donateBtn" disabled>Donate with this card</button>
+        </div>
+      </div>
+
+      <div id="panel-corp" role="tabpanel" aria-labelledby="tab-corp" hidden>
+        <div class="fields">
+          <div class="field"><label for="company">Business name</label><input type="text" id="company" maxlength="40" value="Lake Burley Bakery"></div>
+          <div class="field"><label for="logo">Logo (PNG or JPG)</label><input type="file" id="logo" accept="image/png,image/jpeg"></div>
+        </div>
+        <div class="plans" id="plans" role="group" aria-label="Plan"></div>
+        <p class="hint">Example prices. The association sets real prices in the website dashboard.</p>
+        <div class="row" style="margin-top:10px"><button class="btn" id="payBtn" disabled>Choose a plan</button></div>
+      </div>
+    </section>
+
+    <section class="step" aria-labelledby="h-share" id="shareStep">
+      <h2 id="h-share"><span class="num">5</span>Send your card</h2>
+      <p class="lock-note">Corporate cards unlock after you choose a plan and pay.</p>
+      <div class="share-grid">
+        <a class="share" id="waLink" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20l1.2-3.6A8 8 0 1 1 8 19z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 9.5c.3 1.8 2.2 3.9 4.5 4.6l1-1.2 1.8.8c-.2 1-1 1.6-2 1.6-3 0-6-3-6-6 0-1 .6-1.8 1.6-2l.8 1.8z" fill="currentColor"/></svg>WhatsApp</a>
+        <a class="share" id="smsLink">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 17l-1 4 5-4" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>SMS</a>
+        <a class="share" id="mailLink">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 6l8.5 7 8.5-7" stroke="currentColor" stroke-width="1.8"/></svg>Email</a>
+        <button class="share" id="copyBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" stroke="currentColor" stroke-width="1.8"/></svg>Copy link</button>
+      </div>
+      <div class="linkbox"><input type="text" id="cardLink" readonly aria-label="Card link"></div>
+
+      <div class="how">
+        <div><h3>Free: your own apps</h3><p>WhatsApp, SMS and email open on your phone with the card link filled in. You press send. No cost to the association.</p></div>
+        <div><h3>Paid: sent by the website</h3><p>The website delivers the card itself through a messaging service, charged per message. Offered on corporate plans.</p></div>
+      </div>
+
+      <div class="direct" id="direct">
+        <h3>Send directly from the website (corporate)</h3>
+        <div class="fields">
+          <div class="field"><label for="dPhone">Mobile number</label><input type="tel" id="dPhone" placeholder="04xx xxx xxx"></div>
+          <div class="field"><label for="dEmail">Email</label><input type="email" id="dEmail" placeholder="name@example.com"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost" data-direct="SMS">Send SMS</button>
+          <button class="btn ghost" data-direct="WhatsApp">Send WhatsApp</button>
+          <button class="btn ghost" data-direct="email">Send email</button>
+        </div>
+        <p class="status" id="directStatus" role="status"></p>
+      </div>
+    </section>
+  </div>
+
+  <aside class="preview" aria-label="Card preview">
+    <canvas id="card" width="1080" height="1350" role="img" aria-label="Card preview"></canvas>
+    <div class="row">
+      <button class="btn" id="recipBtn">See what they receive</button>
+      <button class="btn ghost" id="dlBtn">Download image</button>
+    </div>
+    <p class="hint" id="dlHint" style="text-align:center;margin:0"></p>
+  </aside>
+</main>
+
+<footer>Demo built by NKDS (Nilay Kanitkar Digital Solutions). In the live website this runs inside WordPress, and admins add occasions, designs and prices from the dashboard.</footer>
+
+<div class="modal" id="checkout" role="dialog" aria-modal="true" aria-labelledby="coTitle">
+  <div class="sheet">
+    <h2 id="coTitle">Checkout</h2>
+    <div id="coLines"></div>
+    <p class="stripe-note">On the live website this button opens Stripe's secure checkout. This demo takes no payment and asks for no card details.</p>
+    <div class="row"><button class="btn" id="coOk">Continue (demo)</button><button class="btn ghost" id="coCancel">Cancel</button></div>
+  </div>
+</div>
+
+<div class="recipient" id="recipient" aria-live="polite">
+  <button class="close" id="recClose">Close preview</button>
+  <h2 id="recTitle">You've got a card</h2>
+  <div class="env" id="env">
+    <div class="env-back"></div>
+    <div class="env-card"><img id="recImg" alt="Your greeting card"></div>
+    <div class="env-front"></div>
+    <div class="env-flap"></div>
+  </div>
+  <img class="reveal" id="recReveal" alt="Your greeting card">
+  <button class="btn light" id="openEnv">Open your card</button>
+  <div class="after">
+    <button class="btn light" id="makeOwn">Make your own card</button>
+    <button class="btn ghost" id="supportBtn" style="color:#fff;border-color:rgba(255,255,255,.5)">Support local projects</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  "use strict";
+  var W = 1080, H = 1350;
+  var OCC = [
+    {id:"birthday", label:"Birthday", head:"Happy Birthday", motif:"balloons",
+     msg:"Wishing you a year full of good coffee, sunny Canberra mornings and people who make you laugh.",
+     pal:["#fde8ef","#ffd9b0","#e0457b","#3a1d2b"]},
+    {id:"newyear", label:"New Year", head:"Happy New Year", motif:"fireworks",
+     msg:"Here's to a fresh start, new adventures and another year of doing good things together.",
+     pal:["#152443","#3b2f6e","#f5c451","#fff6e0"]},
+    {id:"diwali", label:"Diwali", head:"Happy Diwali", motif:"diyas",
+     msg:"May the festival of lights fill your home with joy, warmth and good fortune.",
+     pal:["#3b0d2e","#7a1f3d","#ffb347","#fff3dc"]},
+    {id:"lunar", label:"Lunar New Year", head:"Happy Lunar New Year", motif:"lanterns",
+     msg:"Wishing you health, luck and happiness in the year ahead.",
+     pal:["#9e1419","#d3352c","#f6c453","#fff4e0"]},
+    {id:"christmas", label:"Christmas", head:"Merry Christmas", motif:"baubles",
+     msg:"Warm wishes for a joyful Christmas and a long, relaxing summer break.",
+     pal:["#0f3b2e","#1d5c46","#f2c14e","#f7f3e8"]},
+    {id:"eid", label:"Eid", head:"Eid Mubarak", motif:"crescent",
+     msg:"Wishing you and your family peace, blessings and happiness this Eid.",
+     pal:["#0e2f4f","#1c4f7a","#e9c46a","#f5f1e6"]},
+    {id:"thanks", label:"Thank you", head:"Thank You", motif:"hearts",
+     msg:"Thank you for your kindness and for everything you do for our community.",
+     pal:["#e9f4ed","#cbe6d6","#2f7d5b","#15302a"]}
+  ];
+  var STYLES = [
+    {id:"classic", label:"Classic"},
+    {id:"confetti", label:"Confetti"},
+    {id:"wattle", label:"Wattle"},
+    {id:"frame", label:"Framed"}
+  ];
+  var FONTS = [
+    {id:"elegant", label:"Elegant", head:"DM Serif Display", body:"Figtree", hs:1, bs:1, bw:"400"},
+    {id:"friendly", label:"Friendly", head:"Nunito", body:"Nunito", hs:0.95, bs:1, hw:"800", bw:"500"},
+    {id:"hand", label:"Handwritten", head:"Caveat", body:"Caveat", hs:1.2, bs:1.3, hw:"700", bw:"500"}
+  ];
+  var DONATIONS = [0,5,10,20,-1];
+  var PLANS = [
+    {id:"oneoff", label:"One card", price:"A$15", note:"one-off"},
+    {id:"monthly", label:"Monthly", price:"A$29", note:"per month, up to 50 cards"},
+    {id:"annual", label:"Annual", price:"A$290", note:"per year, up to 600 cards"}
+  ];
+
+  var state = {occ:0, style:0, font:0, to:"", msg:"", from:"", type:"personal",
+               donation:0, plan:null, paid:false, company:"", logo:null};
+  var $ = function(id){ return document.getElementById(id); };
+  var framed = false;
+  try { framed = window.self !== window.parent; } catch(e){ framed = true; }
+
+  function rng(seed){
+    return function(){
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function hexA(hex, a){
+    var n = parseInt(hex.slice(1), 16);
+    return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+  }
+
+  /* ---------- card drawing ---------- */
+  function background(ctx, o, st, r){
+    var p = o.pal;
+    var g = ctx.createLinearGradient(0, 0, W * 0.4, H);
+    g.addColorStop(0, p[0]); g.addColorStop(1, p[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var dark = isDark(o);
+    if (dark && st.id !== "confetti"){
+      for (var i = 0; i < 90; i++){
+        ctx.fillStyle = hexA("#ffffff", 0.15 + r() * 0.5);
+        ctx.beginPath(); ctx.arc(r() * W, r() * H * 0.55, 1 + r() * 2.4, 0, 7); ctx.fill();
+      }
+    }
+    if (st.id === "confetti"){
+      var cols = [p[2], p[3], "#ffffff", dark ? "#7fd1b9" : "#2f9e7a"];
+      for (var j = 0; j < 150; j++){
+        var x = r() * W, y = r() < 0.75 ? r() * H * 0.36 : H * 0.86 + r() * H * 0.14;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(r() * 6.28);
+        ctx.fillStyle = hexA(cols[j % 4], 0.85);
+        if (j % 3 === 0){ ctx.beginPath(); ctx.arc(0, 0, 5 + r() * 6, 0, 7); ctx.fill(); }
+        else { ctx.fillRect(-9, -4, 18 + r() * 8, 8); }
+        ctx.restore();
+      }
+    }
+    if (st.id === "wattle"){
+      wattle(ctx, 60, 110, 1, r, dark, 1);
+      wattle(ctx, W - 28, H - 28, -1, r, dark, 0.5);
+    }
+    if (st.id === "frame"){
+      ctx.strokeStyle = p[2]; ctx.lineWidth = 8;
+      roundRect(ctx, 42, 42, W - 84, H - 84, 28); ctx.stroke();
+      ctx.lineWidth = 2; ctx.strokeStyle = hexA(p[2], 0.6);
+      roundRect(ctx, 62, 62, W - 124, H - 124, 20); ctx.stroke();
+      [[62,62],[W-62,62],[62,H-62],[W-62,H-62]].forEach(function(c){
+        ctx.fillStyle = p[2]; ctx.beginPath(); ctx.arc(c[0], c[1], 12, 0, 7); ctx.fill();
+      });
+    }
+  }
+  function isDark(o){ var n = parseInt(o.pal[0].slice(1), 16); return ((n >> 16 & 255) + (n >> 8 & 255) + (n & 255)) < 300; }
+  function roundRect(ctx, x, y, w, h, rad){
+    ctx.beginPath();
+    ctx.moveTo(x + rad, y); ctx.arcTo(x + w, y, x + w, y + h, rad); ctx.arcTo(x + w, y + h, x, y + h, rad);
+    ctx.arcTo(x, y + h, x, y, rad); ctx.arcTo(x, y, x + w, y, rad); ctx.closePath();
+  }
+  function wattle(ctx, cx, cy, dir, r, dark, sz){
+    for (var k = 0; k < 7; k++){
+      var a = (dir > 0 ? 0.1 : 3.24) + k * 0.22 + r() * 0.1;
+      var len = (140 + r() * 120) * sz;
+      var ex = cx + Math.cos(a) * len, ey = cy + Math.sin(a) * len * 0.9;
+      ctx.strokeStyle = dark ? "#7fae8f" : "#4f7d5c"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.quadraticCurveTo((cx + ex) / 2, cy + (ey - cy) * 0.2, ex, ey); ctx.stroke();
+      ctx.save(); ctx.translate((cx + ex) / 2, (cy + ey) / 2); ctx.rotate(a + 0.5);
+      ctx.fillStyle = dark ? "#5f9a76" : "#5d8f68";
+      ctx.beginPath(); ctx.ellipse(0, 0, 46, 9, 0, 0, 7); ctx.fill(); ctx.restore();
+      for (var b = 0; b < 9; b++){
+        var t = 0.35 + r() * 0.7;
+        var bx = cx + (ex - cx) * t + (r() - 0.5) * 40, by = cy + (ey - cy) * t + (r() - 0.5) * 40;
+        ctx.fillStyle = b % 3 ? "#f2b705" : "#ffd23f";
+        ctx.beginPath(); ctx.arc(bx, by, 9 + r() * 7, 0, 7); ctx.fill();
+      }
+    }
+  }
+  function star(ctx, x, y, R, rr){
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++){
+      var rad = i % 2 ? rr : R, a = -Math.PI / 2 + i * Math.PI / 5;
+      ctx.lineTo(x + Math.cos(a) * rad, y + Math.sin(a) * rad);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  function heart(ctx, x, y, s){
+    ctx.beginPath(); ctx.moveTo(x, y + s * 0.3);
+    ctx.bezierCurveTo(x, y, x - s * 0.5, y, x - s * 0.5, y + s * 0.3);
+    ctx.bezierCurveTo(x - s * 0.5, y + s * 0.6, x, y + s * 0.8, x, y + s);
+    ctx.bezierCurveTo(x, y + s * 0.8, x + s * 0.5, y + s * 0.6, x + s * 0.5, y + s * 0.3);
+    ctx.bezierCurveTo(x + s * 0.5, y, x, y, x, y + s * 0.3); ctx.fill();
+  }
+  function motif(ctx, o, r){
+    var p = o.pal, i;
+    ctx.save();
+    if (o.motif === "balloons"){
+      var bc = [p[2], "#f59e0b", "#3b82c4", "#2f9e7a", "#9b5de5"];
+      var xs = [250, 410, 560, 700, 850];
+      for (i = 0; i < 5; i++){
+        var bx = xs[i], by = 210 + (i % 2) * 70 + r() * 30;
+        ctx.strokeStyle = hexA(p[3], 0.5); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(bx, by + 92); ctx.bezierCurveTo(bx - 20, by + 170, bx + 20, by + 220, bx, by + 260); ctx.stroke();
+        ctx.fillStyle = bc[i]; ctx.beginPath(); ctx.ellipse(bx, by, 64, 82, 0, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(bx - 10, by + 92); ctx.lineTo(bx + 10, by + 92); ctx.lineTo(bx, by + 80); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.ellipse(bx - 22, by - 30, 12, 22, -0.5, 0, 7); ctx.fill();
+      }
+    } else if (o.motif === "fireworks"){
+      var centres = [[280,250,130],[640,190,160],[860,330,110],[460,380,90]];
+      centres.forEach(function(c, k){
+        var col = k % 2 ? "#ff7eb6" : p[2];
+        ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineCap = "round";
+        for (var j = 0; j < 22; j++){
+          var a = j / 22 * 6.283, r1 = c[2] * 0.3, r2 = c[2] * (0.8 + r() * 0.25);
+          ctx.beginPath(); ctx.moveTo(c[0] + Math.cos(a) * r1, c[1] + Math.sin(a) * r1);
+          ctx.lineTo(c[0] + Math.cos(a) * r2, c[1] + Math.sin(a) * r2); ctx.stroke();
+          ctx.fillStyle = col; ctx.beginPath(); ctx.arc(c[0] + Math.cos(a) * (r2 + 14), c[1] + Math.sin(a) * (r2 + 14), 4, 0, 7); ctx.fill();
+        }
+      });
+    } else if (o.motif === "diyas"){
+      for (i = 0; i < 5; i++){
+        var dx = 180 + i * 180, dy = 380;
+        ctx.shadowColor = "#ffb347"; ctx.shadowBlur = 50;
+        ctx.fillStyle = "#ffd36b"; ctx.beginPath();
+        ctx.moveTo(dx, dy - 110); ctx.quadraticCurveTo(dx + 26, dy - 60, dx, dy - 40); ctx.quadraticCurveTo(dx - 26, dy - 60, dx, dy - 110); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#c2410c"; ctx.beginPath(); ctx.ellipse(dx, dy - 30, 80, 46, 0, 0, Math.PI); ctx.fill();
+        ctx.fillStyle = p[2]; ctx.beginPath(); ctx.ellipse(dx, dy - 30, 80, 14, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = "#7c2d12"; ctx.beginPath(); ctx.ellipse(dx, dy - 30, 60, 8, 0, 0, 7); ctx.fill();
+      }
+    } else if (o.motif === "lanterns"){
+      [[260,150,1],[540,90,1.25],[820,160,1]].forEach(function(l){
+        var lx = l[0], ly = l[1], s = l[2];
+        ctx.strokeStyle = p[2]; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, ly); ctx.stroke();
+        ctx.fillStyle = p[2]; ctx.fillRect(lx - 36 * s, ly, 72 * s, 18 * s);
+        ctx.fillStyle = "#e11d2e"; ctx.beginPath(); ctx.ellipse(lx, ly + 110 * s, 105 * s, 92 * s, 0, 0, 7); ctx.fill();
+        ctx.strokeStyle = hexA(p[2], 0.8); ctx.lineWidth = 3;
+        for (var q = -2; q <= 2; q++){ ctx.beginPath(); ctx.ellipse(lx, ly + 110 * s, Math.abs(q) * 24 * s + 4, 92 * s, 0, 0, 7); ctx.stroke(); }
+        ctx.fillStyle = p[2]; ctx.fillRect(lx - 36 * s, ly + 196 * s, 72 * s, 18 * s);
+        ctx.strokeStyle = p[2]; ctx.lineWidth = 3;
+        for (q = -3; q <= 3; q++){ ctx.beginPath(); ctx.moveTo(lx + q * 6, ly + 214 * s); ctx.lineTo(lx + q * 8, ly + 280 * s); ctx.stroke(); }
+      });
+    } else if (o.motif === "baubles"){
+      var bb = [[230,200,62,p[2]],[420,300,50,"#d1495b"],[600,170,70,"#e9f5f0"],[790,280,56,p[2]],[920,160,40,"#d1495b"]];
+      bb.forEach(function(b){
+        ctx.strokeStyle = hexA(p[3], 0.6); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(b[0], 0); ctx.lineTo(b[0], b[1] - b[2]); ctx.stroke();
+        ctx.fillStyle = "#c9a227"; ctx.fillRect(b[0] - 12, b[1] - b[2] - 14, 24, 18);
+        ctx.fillStyle = b[3]; ctx.beginPath(); ctx.arc(b[0], b[1], b[2], 0, 7); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.arc(b[0] - b[2] * 0.35, b[1] - b[2] * 0.35, b[2] * 0.22, 0, 7); ctx.fill();
+      });
+      ctx.fillStyle = p[2]; star(ctx, 120, 360, 26, 11); star(ctx, 980, 400, 20, 8);
+    } else if (o.motif === "crescent"){
+      var off = document.createElement("canvas"); off.width = 400; off.height = 400;
+      var c2 = off.getContext("2d");
+      c2.fillStyle = p[2]; c2.beginPath(); c2.arc(200, 200, 150, 0, 7); c2.fill();
+      c2.globalCompositeOperation = "destination-out"; c2.beginPath(); c2.arc(262, 160, 132, 0, 7); c2.fill();
+      ctx.shadowColor = p[2]; ctx.shadowBlur = 40; ctx.drawImage(off, 340, 20); ctx.shadowBlur = 0;
+      ctx.fillStyle = p[2]; star(ctx, 690, 210, 40, 17); star(ctx, 250, 140, 16, 7); star(ctx, 860, 330, 14, 6);
+    } else if (o.motif === "hearts"){
+      var hc = [p[2], "#e07a5f", "#f2b705"];
+      for (i = 0; i < 9; i++){
+        ctx.fillStyle = hexA(hc[i % 3], 0.85);
+        heart(ctx, 140 + i * 100 + r() * 30, 150 + Math.sin(i) * 90 + r() * 40, 60 + r() * 40);
+      }
+    }
+    ctx.restore();
+  }
+  function fontStr(weight, size, fam){
+    var fb = fam === "Caveat" ? "cursive" : fam === "DM Serif Display" ? "Georgia, serif" : "system-ui, sans-serif";
+    return weight + " " + Math.round(size) + "px '" + fam + "', " + fb;
+  }
+  function wrap(ctx, text, maxW){
+    var words = text.split(/\s+/), lines = [], line = "";
+    for (var i = 0; i < words.length; i++){
+      var test = line ? line + " " + words[i] : words[i];
+      if (ctx.measureText(test).width > maxW && line){ lines.push(line); line = words[i]; }
+      else line = test;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+  function drawCard(ctx, d, scale){
+    var o = OCC[d.occ], st = STYLES[d.style], f = FONTS[d.font], p = o.pal;
+    var r = rng(d.occ * 97 + d.style * 13 + 7);
+    ctx.save(); ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    background(ctx, o, st, r);
+    motif(ctx, o, r);
+    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillStyle = p[3];
+    var hs = 118 * f.hs;
+    ctx.font = fontStr(f.hw || "400", hs, f.head);
+    while (ctx.measureText(o.head).width > W - 180 && hs > 60){ hs -= 4; ctx.font = fontStr(f.hw || "400", hs, f.head); }
+    var bs = 44 * f.bs;
+    ctx.font = fontStr(f.bw, bs, f.body);
+    var lines = wrap(ctx, d.msg || "", 820).slice(0, 7);
+    var blockH = (d.to ? bs * 1.55 : 0) + lines.length * bs * 1.4 + (d.from ? bs * 1.8 : 0);
+    var area0 = 450, area1 = H - 170, groupH = hs * 0.8 + 70 + blockH;
+    var headY = area0 + Math.max(0, (area1 - area0 - groupH) / 2) + hs * 0.8;
+    ctx.font = fontStr(f.hw || "400", hs, f.head);
+    ctx.fillText(o.head, W / 2, headY);
+    ctx.fillStyle = p[2]; ctx.fillRect(W / 2 - 60, headY + 32, 120, 5);
+    ctx.fillStyle = p[3];
+    var y = headY + 70 + bs;
+    if (d.to){ ctx.font = fontStr("600", bs, f.body); ctx.fillText("Dear " + d.to + ",", W / 2, y); y += bs * 1.55; }
+    ctx.font = fontStr(f.bw, bs, f.body);
+    lines.forEach(function(l){ ctx.fillText(l, W / 2, y); y += bs * 1.4; });
+    if (d.from){ ctx.font = fontStr("600", bs, f.body); y += bs * 0.4; ctx.fillText("From " + d.from, W / 2, Math.min(y, H - 190)); }
+    ctx.font = fontStr("500", 26, "Figtree"); ctx.fillStyle = hexA(p[3], 0.7);
+    if (d.type === "corporate" && (d.company || d.logo)){
+      if (d.logo){
+        var lw = d.logo.width, lh = d.logo.height, k = Math.min(240 / lw, 96 / lh);
+        ctx.fillStyle = "rgba(255,255,255,.92)"; roundRect(ctx, W / 2 - lw * k / 2 - 18, H - 180, lw * k + 36, lh * k + 24, 14); ctx.fill();
+        ctx.drawImage(d.logo, W / 2 - lw * k / 2, H - 168, lw * k, lh * k);
+        ctx.fillStyle = hexA(p[3], 0.75); ctx.fillText(d.company ? "With best wishes from " + d.company : "", W / 2, H - 30);
+      } else {
+        ctx.font = fontStr("700", 34, "Figtree"); ctx.fillStyle = p[3]; ctx.fillText("With best wishes from " + d.company, W / 2, H - 70);
+      }
+    } else {
+      ctx.fillText("Sent free with Community E-Greetings", W / 2, H - 64);
+    }
+    ctx.restore();
+  }
+
+  /* ---------- UI ---------- */
+  var cardCanvas = $("card"), cardCtx = cardCanvas.getContext("2d");
+  function data(){
+    return {occ:state.occ, style:state.style, font:state.font, to:state.to.trim(), msg:state.msg.trim(),
+            from:state.from.trim(), type:state.type, company:state.company.trim(), logo:state.logo};
+  }
+  function render(){
+    cardCtx.clearRect(0, 0, W, H);
+    drawCard(cardCtx, data(), 1);
+    cardCanvas.setAttribute("aria-label", OCC[state.occ].head + " card for " + (state.to || "someone"));
+    renderThumbs();
+    updateLinks();
+  }
+  function renderThumbs(){
+    var thumbs = document.querySelectorAll("#designs canvas");
+    thumbs.forEach(function(c, i){
+      var ctx = c.getContext("2d"), d = data();
+      d.style = i; d.msg = ""; d.to = ""; d.from = ""; d.type = "personal";
+      ctx.clearRect(0, 0, c.width, c.height);
+      drawCard(ctx, d, c.width / W);
+    });
+  }
+  function encode(d){
+    var o = {o:d.occ, s:d.style, f:d.font, t:d.to, m:d.msg, fr:d.from};
+    if (d.type === "corporate" && d.company) o.c = d.company;
+    var b = btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+    return b.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function decode(s){
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var o = JSON.parse(decodeURIComponent(escape(atob(s))));
+    return {occ:clamp(o.o, OCC.length), style:clamp(o.s, STYLES.length), font:clamp(o.f, FONTS.length),
+            to:String(o.t || "").slice(0, 40), msg:String(o.m || "").slice(0, 260), from:String(o.fr || "").slice(0, 40),
+            type:o.c ? "corporate" : "personal", company:String(o.c || "").slice(0, 40), logo:null};
+  }
+  function clamp(n, max){ n = parseInt(n, 10); return n >= 0 && n < max ? n : 0; }
+  function cardUrl(){
+    var base = location.href.split(/[?#]/)[0];
+    return base + "?card=" + encode(data());
+  }
+  function updateLinks(){
+    var url = cardUrl(), d = data(), o = OCC[state.occ];
+    var who = d.type === "corporate" && d.company ? d.company : (d.from || "Someone");
+    var text = who + " sent you a " + o.label + " e-card: " + url;
+    $("waLink").href = "https://wa.me/?text=" + encodeURIComponent(text);
+    $("smsLink").href = "sms:?&body=" + encodeURIComponent(text);
+    $("mailLink").href = "mailto:?subject=" + encodeURIComponent(o.head + (d.to ? ", " + d.to : "")) + "&body=" + encodeURIComponent(text);
+    $("cardLink").value = url;
+    var locked = state.type === "corporate" && !state.paid;
+    $("shareStep").classList.toggle("locked", locked);
+    var direct = $("direct");
+    direct.style.opacity = state.type === "corporate" ? "1" : ".55";
+  }
+
+  function chipGroup(el, items, labelFn, current, onPick){
+    el.innerHTML = "";
+    items.forEach(function(it, i){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = labelFn(it, i);
+      b.setAttribute("aria-pressed", i === current ? "true" : "false");
+      b.addEventListener("click", function(){
+        el.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", "false"); });
+        b.setAttribute("aria-pressed", "true"); onPick(i);
+      });
+      el.appendChild(b);
+    });
+  }
+  chipGroup($("occasions"), OCC, function(o){ return o.label; }, 0, function(i){
+    var wasDefault = state.msg === OCC[state.occ].msg;
+    state.occ = i;
+    if (wasDefault || !state.msg){ state.msg = OCC[i].msg; $("msg").value = state.msg; countChars(); }
+    render();
+  });
+  chipGroup($("fonts"), FONTS, function(f){ return f.label; }, 0, function(i){ state.font = i; render(); });
+  chipGroup($("donations"), DONATIONS, function(v){ return v === 0 ? "No thanks" : v < 0 ? "Other amount" : "A$" + v; }, 0, function(i){
+    state.donation = DONATIONS[i];
+    $("otherWrap").style.display = state.donation < 0 ? "flex" : "none";
+    $("donateBtn").disabled = state.donation === 0;
+    $("donateBtn").textContent = state.donation === 0 ? "Donate with this card" : "Donate " + donationLabel() + " with this card";
+  });
+  function donationLabel(){
+    var v = state.donation < 0 ? Math.max(1, parseInt($("other").value, 10) || 0) : state.donation;
+    return "A$" + v;
+  }
+  $("other").addEventListener("input", function(){ if (state.donation < 0) $("donateBtn").textContent = "Donate " + donationLabel() + " with this card"; });
+
+  var designs = $("designs");
+  STYLES.forEach(function(s, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "design"; b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+    b.setAttribute("aria-label", s.label + " design");
+    var c = document.createElement("canvas"); c.width = 216; c.height = 270;
+    var sp = document.createElement("span"); sp.textContent = s.label;
+    b.appendChild(c); b.appendChild(sp);
+    b.addEventListener("click", function(){
+      designs.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true"); state.style = i; render();
+    });
+    designs.appendChild(b);
+  });
+
+  var plansEl = $("plans");
+  PLANS.forEach(function(pl){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "plan"; b.setAttribute("aria-pressed", "false");
+    b.innerHTML = "<span></span><b></b><small></small>";
+    b.children[0].textContent = pl.label; b.children[1].textContent = pl.price; b.children[2].textContent = pl.note;
+    b.addEventListener("click", function(){
+      plansEl.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true"); state.plan = pl;
+      $("payBtn").disabled = false; $("payBtn").textContent = "Pay " + pl.price + " and unlock sending";
+    });
+    plansEl.appendChild(b);
+  });
+
+  function setType(t){
+    state.type = t;
+    $("tab-personal").setAttribute("aria-selected", t === "personal" ? "true" : "false");
+    $("tab-corp").setAttribute("aria-selected", t === "corporate" ? "true" : "false");
+    $("panel-personal").hidden = t !== "personal";
+    $("panel-corp").hidden = t !== "corporate";
+    render();
+  }
+  $("tab-personal").addEventListener("click", function(){ setType("personal"); });
+  $("tab-corp").addEventListener("click", function(){ setType("corporate"); });
+
+  ["to", "from", "msg", "company"].forEach(function(id){
+    $(id).addEventListener("input", function(){ state[id] = $(id).value; if (id === "msg") countChars(); render(); });
+  });
+  function countChars(){ $("count").textContent = $("msg").value.length; }
+  $("logo").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var rd = new FileReader();
+    rd.onload = function(){ var img = new Image(); img.onload = function(){ state.logo = img; render(); }; img.src = rd.result; };
+    rd.readAsDataURL(file);
+  });
+
+  /* checkout (demo) */
+  var coMode = null;
+  function openCheckout(mode){
+    coMode = mode;
+    var lines = $("coLines"); lines.innerHTML = "";
+    var rows = mode === "donate"
+      ? [["Personal " + OCC[state.occ].label + " card", "Free"], ["Donation to community projects", donationLabel()]]
+      : [["Corporate plan: " + state.plan.label, state.plan.price], ["Card design and sending", "Included"]];
+    rows.forEach(function(r){
+      var d = document.createElement("div"); d.className = "sum";
+      var a = document.createElement("span"); a.textContent = r[0];
+      var b = document.createElement("b"); b.textContent = r[1];
+      d.appendChild(a); d.appendChild(b); lines.appendChild(d);
+    });
+    $("checkout").classList.add("show"); $("coOk").focus();
+  }
+  function closeCheckout(){ $("checkout").classList.remove("show"); }
+  $("donateBtn").addEventListener("click", function(){ openCheckout("donate"); });
+  $("payBtn").addEventListener("click", function(){ if (state.plan) openCheckout("plan"); });
+  $("coCancel").addEventListener("click", closeCheckout);
+  $("coOk").addEventListener("click", function(){
+    closeCheckout();
+    if (coMode === "plan"){ state.paid = true; updateLinks(); toast("Demo: sending unlocked. No payment was taken."); }
+    else toast("Demo: thank you message shown. No payment was taken.");
+    $("shareStep").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape"){ closeCheckout(); } });
+
+  /* sharing */
+  $("copyBtn").addEventListener("click", function(){
+    var url = $("cardLink").value;
+    try {
+      navigator.clipboard.writeText(url).then(function(){ toast("Card link copied"); }, function(){ selectLink(); });
+    } catch(e){ selectLink(); }
+  });
+  function selectLink(){ var i = $("cardLink"); i.focus(); i.select(); toast("Press Ctrl+C (or long-press) to copy the link"); }
+  document.querySelectorAll("[data-direct]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var ch = b.getAttribute("data-direct");
+      var st = $("directStatus");
+      if (state.type !== "corporate"){ st.textContent = "Direct sending is part of the corporate plans. Personal cards are shared from your own apps above."; return; }
+      if (!state.paid){ st.textContent = "Choose a plan and pay first to unlock direct sending."; return; }
+      st.textContent = "Demo only, nothing was sent. On the live site this " + ch + " goes out through a paid messaging service, charged per message.";
+    });
+  });
+
+  /* download */
+  if (framed) $("dlHint").textContent = "Downloads are blocked inside this preview window. They work when the demo runs on its own website.";
+  $("dlBtn").addEventListener("click", function(){
+    try {
+      cardCanvas.toBlob(function(blob){
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = OCC[state.occ].id + "-card.png";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+      }, "image/png");
+    } catch(e){ toast("This browser blocked the download"); }
+  });
+
+  /* recipient view */
+  function showRecipient(d, standalone){
+    var c = document.createElement("canvas"); c.width = 540; c.height = 675;
+    drawCard(c.getContext("2d"), d, 0.5);
+    var big = document.createElement("canvas"); big.width = 864; big.height = 1080;
+    drawCard(big.getContext("2d"), d, 0.8);
+    $("recImg").src = c.toDataURL("image/png");
+    $("recReveal").src = big.toDataURL("image/png");
+    $("recTitle").textContent = (d.type === "corporate" && d.company ? d.company : (d.from || "Someone")) + " sent you a card";
+    $("env").classList.remove("open"); $("recipient").classList.remove("opened");
+    $("openEnv").style.display = "";
+    $("recClose").style.display = standalone ? "none" : "";
+    $("recipient").classList.add("show");
+    $("openEnv").focus();
+  }
+  $("openEnv").addEventListener("click", function(){
+    $("env").classList.add("open"); $("openEnv").style.display = "none";
+    var quick = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(function(){ $("recipient").classList.add("opened"); }, quick ? 0 : 1300);
+  });
+  $("recipBtn").addEventListener("click", function(){ showRecipient(data(), false); });
+  $("recClose").addEventListener("click", function(){ $("recipient").classList.remove("show"); $("recipBtn").focus(); });
+  $("makeOwn").addEventListener("click", function(){
+    $("recipient").classList.remove("show");
+    if (location.search.indexOf("card=") > -1){ try { history.replaceState(null, "", location.pathname); } catch(e){} }
+  });
+  $("supportBtn").addEventListener("click", function(){
+    $("recipient").classList.remove("show"); setType("personal");
+    var chips = $("donations").querySelectorAll("button"); chips[2].click();
+    $("panel-personal").scrollIntoView({behavior:"auto", block:"center"});
+  });
+
+  var toastTimer;
+  function toast(t){
+    var el = $("toast"); el.textContent = t; el.classList.add("show");
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 3200);
+  }
+
+  /* start */
+  state.to = $("to").value; state.from = $("from").value; state.company = $("company").value;
+  state.msg = OCC[0].msg; $("msg").value = state.msg; countChars();
+  render();
+  var fontsToLoad = ["118px 'DM Serif Display'", "800 100px Nunito", "500 40px Nunito", "700 100px Caveat", "500 40px Caveat", "600 40px Figtree", "400 40px Figtree"];
+  if (document.fonts && document.fonts.load){
+    Promise.all(fontsToLoad.map(function(f){ return document.fonts.load(f).catch(function(){}); })).then(render);
+  }
+  var q = location.search.match(/[?&]card=([^&]+)/);
+  if (q){
+    try {
+      var incoming = decode(q[1]);
+      var go = function(){ showRecipient(incoming, true); };
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ setTimeout(go, 50); }); else go();
+    } catch(e){ toast("This card link looks incomplete. Ask the sender to share it again."); }
+  }
+})();
+</script>
+</body>
+</html>
